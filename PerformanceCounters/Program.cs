@@ -8,35 +8,40 @@ namespace PerformanceCounters
 {
     class Program
     {
+        static readonly String CATEGORY = "AVEMath";
+        static readonly String COUNTER = "Sin";
+
         static void CreateCounter() 
         {
             CounterCreationDataCollection data = new CounterCreationDataCollection();
             CounterCreationData samplesCounter = new CounterCreationData();
             samplesCounter.CounterType = PerformanceCounterType.NumberOfItems32;
-            samplesCounter.CounterName = "SampleCounter";
+            samplesCounter.CounterName = COUNTER;
             data.Add(samplesCounter);
 
             PerformanceCounterCategory.Create(
-                "SampleCategory",
-                "Simple performance counter in C#",
-                PerformanceCounterCategoryType.SingleInstance,
+                CATEGORY,
+                "A fictitious performance counter in C#",
+                PerformanceCounterCategoryType.MultiInstance,
                 data);
         }
 
         static void Main(string[] args)
         {
-            if (!PerformanceCounterCategory.Exists("SampleCategory") )
+            //PerformanceCounterCategory.Delete(CATEGORY);
+            if (!PerformanceCounterCategory.Exists(CATEGORY) )
             {
                 CreateCounter();
             }
             PerformanceCounter counter = new PerformanceCounter(
-                "SampleCategory", 
-                "SampleCounter", 
+                CATEGORY, 
+                COUNTER, 
+                AppDomain.CurrentDomain.FriendlyName,
                 false);
-            for (int i = 0; i < 360*4; ++i)
+            for (int i = 0; ; ++i)
             {
-                double sinValue = Math.Sin(i*Math.PI/180) * 100;
-                counter.RawValue = (long)(sinValue < 0 ? -sinValue : sinValue);
+                counter.RawValue = (long) (Math.Sin(i*Math.PI/180) * 50 + 50);
+                Console.WriteLine("Counter value = {0}", counter.RawValue);
                 Thread.Sleep(200);
             }
         }
